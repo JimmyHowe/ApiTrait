@@ -12,9 +12,12 @@
         "illuminate/http": "~5.0",
         "illuminate/support": "~5.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "4.*"
+    },
     "autoload": {
         "psr-0": {
-            "JimmyHowe\\Utilites\\ApiTrait": "src/"
+            "JimmyHowe\\Utilities\\ApiTrait": "src/"
         }
     },
     "minimum-stability": "stable"
