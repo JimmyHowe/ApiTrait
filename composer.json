@@ -1,0 +1,15 @@
+{
+    "name": "jimmyhowe/laravel-api-trait",
+    "description": "Laravel API Trait",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jimmy Howe",
+            "email": "jimmyhowe@live.co.uk"
+        }
+    ],
+    "require": {
+        "illuminate/http": "5.1.x-dev",
+        "illuminate/support": "5.1.x-dev"
+    }
+}
