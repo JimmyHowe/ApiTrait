@@ -67,7 +67,7 @@ trait ApiTrait
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function respondNotFound($message = 'Resource not found.')
+    protected function respondNotFound($message = 'Resource Not Found.')
     {
         return $this->setStatusCode(Response::HTTP_NOT_FOUND)->respondWithError($message);
     }
@@ -91,7 +91,7 @@ trait ApiTrait
      *
      * @return mixed
      */
-    protected function respondWithError($message)
+    protected function respondWithError($message = "Error.")
     {
         return $this->respond([
             'status' => 'error',
@@ -158,7 +158,7 @@ trait ApiTrait
      *
      * @return mixed
      */
-    protected function respondWithErrorBag($message)
+    protected function respondWithErrorBag($message = "Validation Error.")
     {
         $data = [
             'status' => 'error',
@@ -191,7 +191,7 @@ trait ApiTrait
      *
      * @return mixed
      */
-    protected function respondSuccess($message)
+    protected function respondSuccess($message = "Success.")
     {
         return $this->respond([
             'status'  => 'success',
@@ -209,7 +209,7 @@ trait ApiTrait
      *
      * @return mixed
      */
-    protected function respondUpdated($message = 'Updated Successfully')
+    protected function respondUpdated($message = 'Updated Successfully.')
     {
         return $this->setStatusCode(Response::HTTP_OK)->respondSuccess($message);
     }
