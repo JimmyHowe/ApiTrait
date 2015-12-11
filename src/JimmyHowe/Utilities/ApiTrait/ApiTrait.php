@@ -1,5 +1,7 @@
 <?php namespace JimmyHowe\Utilities\ApiTrait;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
@@ -8,21 +10,18 @@ trait ApiTrait
 {
     /**
      * Status Code
-     *
      * @var int
      */
     protected $statusCode = Response::HTTP_OK;
 
     /**
      * Validation Errors
-     *
      * @var
      */
     protected $validationErrors;
 
     /**
      * Get the Status Code
-     *
      * @return int
      */
     protected function getStatusCode()
@@ -37,7 +36,7 @@ trait ApiTrait
      *
      * @return $this
      */
-    public function setStatusCode($statusCode)
+    protected function setStatusCode( $statusCode )
     {
         $this->statusCode = $statusCode;
 
@@ -55,51 +54,9 @@ trait ApiTrait
     /**
      * @param mixed $validationErrors
      */
-    public function setValidationErrors($validationErrors)
+    protected function setValidationErrors( $validationErrors )
     {
         $this->validationErrors = $validationErrors;
-    }
-
-    /**
-     * Respond with Not Found Error
-     *
-     * @param string $message
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondNotFound($message = 'Resource not found.')
-    {
-        return $this->setStatusCode(Response::HTTP_NOT_FOUND)->respondWithError($message);
-    }
-
-    /**
-     * Respond with No Content Error
-     *
-     * @param string $message
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondNoContent($message = 'No Content.')
-    {
-        return $this->setStatusCode(Response::HTTP_NO_CONTENT)->respondWithError($message);
-    }
-
-    /**
-     * Respond With Error
-     *
-     * @param $message
-     *
-     * @return mixed
-     */
-    protected function respondWithError($message)
-    {
-        return $this->respond([
-            'status' => 'error',
-            'error'  => [
-                'message' => $message,
-                'code'    => $this->getStatusCode()
-            ]
-        ]);
     }
 
     /**
@@ -108,47 +65,51 @@ trait ApiTrait
      * @param       $data
      * @param array $headers
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    protected function respond($data, $headers = [])
+    protected function respond( $data, $headers = [ ] )
     {
         return response()->json($data, $this->getStatusCode(), $headers);
     }
 
     /**
-     * Respond with Internal Server Error
+     * Respond With Success
      *
      * @param string $message
+     * @param array  $data
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    protected function respondInternalError($message = 'Internal Error.')
+    protected function respondWithSuccess( $message = "Success!", $data = [ ] )
     {
-        return $this->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR)->respondWithError($message);
+        return $this->respond([
+            'status'  => 'success',
+            'success' => [
+                'message' => $message,
+                'code'    => $this->getStatusCode()
+            ],
+            $data
+        ]);
     }
 
     /**
-     * Respond with Unprocessable Entity
+     * Respond With Error
      *
      * @param string $message
+     * @param array  $data
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    protected function respondUnprocessableEntity($message = 'Unprocessable Entity!')
+    protected function respondWithError( $message = "Error!", $data = [ ] )
     {
-        return $this->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)->respondWithError($message);
-    }
-
-    /**
-     * Respond with Validation Fail
-     *
-     * @param string $message
-     *
-     * @return mixed
-     */
-    protected function respondValidationFailed($message = 'Validation Failed!')
-    {
-        return $this->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)->respondWithErrorBag($message);
+        return $this->respond([
+            'status' => 'error',
+            'error'  => [
+                'message' => $message,
+                'code'    => $this->getStatusCode()
+            ],
+            $data
+        ]);
     }
 
     /**
@@ -156,9 +117,9 @@ trait ApiTrait
      *
      * @param $message
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    protected function respondWithErrorBag($message)
+    protected function respondWithErrorBag( $message = "Validation Error." )
     {
         $data = [
             'status' => 'error',
@@ -173,57 +134,173 @@ trait ApiTrait
     }
 
     /**
-     * Respond Created
+     * Respond OK [200]
      *
      * @param string $message
+     * @param array  $data
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    protected function respondCreated($message = 'Created Successfully.')
+    protected function respondOK( $message = 'OK', $data = [ ] )
     {
-        return $this->setStatusCode(Response::HTTP_CREATED)->respondSuccess($message);
+        return $this->respondWithSuccess($message, $data);
     }
 
     /**
-     * Respond Success
+     * Respond Created [201]
      *
-     * @param $message
+     * @param string $message
+     * @param array  $data
+     *
+     * @return JsonResponse
+     */
+    protected function respondCreated( $message = 'Created.', $data = [ ] )
+    {
+        return $this->setStatusCode(Response::HTTP_CREATED)->respondWithSuccess($message, $data);
+    }
+
+    /**
+     * Respond Accepted [202]
+     *
+     * @param string $message
+     * @param array  $data
+     *
+     * @return JsonResponse
+     */
+    protected function respondAccepted( $message = "Accepted.", $data = [ ] )
+    {
+        return $this->setStatusCode(Response::HTTP_ACCEPTED)->respondWithSuccess($message, $data);
+    }
+
+    /**
+     * Respond with No Content Error [202]
+     *
+     * @param string $message
+     * @param array  $data
+     *
+     * @return JsonResponse
+     */
+    protected function respondNoContent( $message = 'No Content.', $data = [ ] )
+    {
+        return $this->setStatusCode(Response::HTTP_NO_CONTENT)->respondWithError($message, $data);
+    }
+
+    /**
+     * Respond with Found [302]
+     *
+     * @param string $message
+     * @param array  $data
+     *
+     * @return JsonResponse
+     */
+    protected function respondFound( $message = "Found.", $data = [ ] )
+    {
+        return $this->setStatusCode(Response::HTTP_FOUND)->respondWithSuccess($message, $data);
+    }
+
+    /**
+     * Respond Unauthorized [401]
+     *
+     * @param string $message
+     * @param array  $data
      *
      * @return mixed
      */
-    protected function respondSuccess($message)
+    protected function respondUnauthorized( $message = "Unauthorized.", $data = [ ] )
     {
-        return $this->respond([
-            'status'  => 'success',
-            'success' => [
-                'message' => $message,
-                'code'    => $this->getStatusCode()
-            ]
-        ]);
+        return $this->setStatusCode(Response::HTTP_UNAUTHORIZED)->respondWithError($message, $data);
+    }
+
+    /**
+     * Respond with Not Found [404]
+     *
+     * @param string $message
+     * @param array  $data
+     *
+     * @return JsonResponse
+     */
+    protected function respondNotFound( $message = 'Resource Not Found.', $data = [ ] )
+    {
+        return $this->setStatusCode(Response::HTTP_NOT_FOUND)->respondWithError($message, $data);
+    }
+
+    /**
+     * Respond with Unprocessable Entity [422]
+     *
+     * @param string $message
+     *
+     * @return JsonResponse
+     */
+    protected function respondUnprocessableEntity( $message = 'Unprocessable Entity!' )
+    {
+        return $this->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)->respondWithError($message);
+    }
+
+    /**
+     * Respond with Internal Server Error
+     *
+     * @param string $message
+     *
+     * @return JsonResponse
+     */
+    protected function respondInternalError( $message = 'Internal Error.' )
+    {
+        return $this->setStatusCode(Response::HTTP_INTERNAL_SERVER_ERROR)->respondWithError($message);
+    }
+
+    /**
+     * Respond with Validation Fail
+     *
+     * @param string $message
+     *
+     * @return JsonResponse
+     */
+    protected function respondValidationFailed( $message = 'Validation Failed!' )
+    {
+        return $this->setStatusCode(Response::HTTP_UNPROCESSABLE_ENTITY)->respondWithErrorBag($message);
     }
 
     /**
      * Respond Updated
      *
      * @param string $message
+     * @param array  $data
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    protected function respondUpdated($message = 'Updated Successfully')
+    protected function respondUpdated( $message = 'Updated.', $data = [ ] )
     {
-        return $this->setStatusCode(Response::HTTP_OK)->respondSuccess($message);
+        return $this->respondWithSuccess($message, $data);
     }
 
     /**
      * Respond Deleted
      *
      * @param string $message
+     * @param array  $data
      *
-     * @return mixed
+     * @return JsonResponse
      */
-    protected function respondDeleted($message = 'Delete Successful.')
+    protected function respondDeleted( $message = 'Deleted.', $data = [ ] )
     {
-        return $this->setStatusCode(Response::HTTP_NO_CONTENT)->respondSuccess($message);
+        return $this->respondNoContent($message, $data);
+    }
+
+    /**
+     * Validate Request Against Rules
+     *
+     * @param Request $request
+     * @param array   $rules
+     *
+     * @return Validator
+     */
+    protected function validateAgainstRules( Request $request, array $rules )
+    {
+        $validator = Validator::make($request->all(), $rules);
+
+        $this->setValidationErrors($validator->errors());
+
+        return $validator;
     }
 
     /**
@@ -234,7 +311,7 @@ trait ApiTrait
      *
      * @return mixed
      */
-    protected function validateAgainstReducedRules(Request $request, array $rules)
+    protected function validateAgainstReducedRules( Request $request, array $rules )
     {
         $reducedRules = array_only($rules, array_keys($request->all()));
 
@@ -242,39 +319,22 @@ trait ApiTrait
     }
 
     /**
-     * Validate Request Against Rules
-     *
-     * @param Request $request
-     * @param array   $rules
-     *
-     * @return mixed
-     */
-    protected function validateAgainstRules(Request $request, array $rules)
-    {
-        $validator = Validator::make($request->all(), $rules);
-
-        $this->setValidationErrors($validator->errors());
-
-        return $validator;
-    }
-
-    /**
-     * Returns the Paginator Info
+     * Returns the Pagination Data
      *
      * @param $paginatedItems
      *
      * @return array
      */
-    protected function getPageInfo($paginatedItems)
+    protected function getPaginationData( LengthAwarePaginator $paginatedItems )
     {
-        $pageInfo = [
-            'pages'   => ceil($paginatedItems->total() / $paginatedItems->perPage()),
+        $paginationInfo = [
             'items'   => $paginatedItems->total(),
+            'pages'   => ceil($paginatedItems->total() / $paginatedItems->perPage()),
+            'each'    => $paginatedItems->perPage(),
             'current' => $paginatedItems->currentPage(),
-            'limit'   => $paginatedItems->perPage()
         ];
 
-        return $pageInfo;
+        return $paginationInfo;
     }
 
 }
