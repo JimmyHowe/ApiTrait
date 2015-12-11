@@ -88,7 +88,7 @@ trait ApiTrait
                 'message' => $message,
                 'code'    => $this->getStatusCode()
             ],
-            $data
+            'data' => $data
         ]);
     }
 
@@ -108,7 +108,7 @@ trait ApiTrait
                 'message' => $message,
                 'code'    => $this->getStatusCode()
             ],
-            $data
+            'data' => $data
         ]);
     }
 
