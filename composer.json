@@ -1,7 +1,8 @@
 {
     "name": "jimmyhowe/laravel-api-trait",
-    "description": "Laravel API Trait",
+    "description": "API Trait for Laravel",
     "license": "MIT",
+    "keywords": ["laravel", "api"],
     "authors": [
         {
             "name": "Jimmy Howe",
@@ -16,7 +17,7 @@
         "phpunit/phpunit": "4.*"
     },
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "JimmyHowe\\Utilities\\ApiTrait": "src/"
         }
     },
