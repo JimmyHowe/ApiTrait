@@ -291,12 +291,13 @@ trait ApiTrait
      *
      * @param Request $request
      * @param array   $rules
+     * @param array   $messages
      *
      * @return Validator
      */
-    protected function validateAgainstRules( Request $request, array $rules )
+    protected function validateAgainstRules( Request $request, array $rules, array $messages = [] )
     {
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         $this->setValidationErrors($validator->errors());
 
@@ -311,11 +312,11 @@ trait ApiTrait
      *
      * @return mixed
      */
-    protected function validateAgainstReducedRules( Request $request, array $rules )
+    protected function validateAgainstReducedRules( Request $request, array $rules, array $messages = [] )
     {
         $reducedRules = array_only($rules, array_keys($request->all()));
 
-        return $this->validateAgainstRules($request, $reducedRules);
+        return $this->validateAgainstRules($request, $reducedRules, $messages);
     }
 
     /**
